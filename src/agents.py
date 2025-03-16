@@ -1,17 +1,61 @@
 """
 Folder that holds base classes for the different AI agents
 """
+import os
+
+from typing import List, Dict, Any, Optional
+from abc import ABC, abstractmethod
 
 from openai import OpenAI
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-from abc import ABC, abstractmethod
+from dotenv import load_dotenv
+
+from utils import function_to_schema
+
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
 
 class _Agent(BaseModel):
     """
     Base class for all AI agents
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._openai = OpenAI()
+    def __init__(self, 
+                 system_prompt: dict, 
+                 model: str, 
+                 functions: list) -> None:
+        self.openai = OpenAI(api_key=api_key)
+        self.messages = []
+        self.system_prompt = system_prompt
+        self.model = model
+        self.tools = [function_to_schema(func) 
+                      for func in functions]
+
+    def _run_full_turn(self, user_message: str):
+        self.messages.append({
+            "role": "user",
+            "content": user_message
+        })
+
+        completion=self.openai.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "developer",
+                        "content": self.system_prompt}] + [self.messages],
+            tools=self.tools
+        ).choices[0]
+
+        # if model returns response, process this
+        if completion.content:
+            model_message = completion.content.message.content
+            self.messages.append({
+                "role": "assistant",
+                "content": model_message
+            })
+            return model_message
         
+        # if it executes a function call, run through all of them
+        
+
+
+
+
+
