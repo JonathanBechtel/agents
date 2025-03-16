@@ -2,6 +2,7 @@
 Folder that holds base classes for the different AI agents
 """
 import os
+import json
 
 from typing import List, Dict, Any, Optional
 from abc import ABC, abstractmethod
@@ -53,7 +54,12 @@ class _Agent(BaseModel):
             return model_message
         
         # if it executes a function call, run through all of them
-        
+    def _execute_tool_call(self, tool_call, tools_map):
+        name = tool_call.function.name
+        args = json.loads(tool_call.function.args)
+
+        # better way to put your own spin on this?
+        return tools_map[name](**args)
 
 
 
