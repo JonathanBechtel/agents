@@ -2,3 +2,5 @@ pydantic
 openai
 requests
 python-dotenv
+selenium
+webdriver-manager

@@ -8,12 +8,18 @@ from openai import OpenAI
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from utils import function_to_schema
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+
+from utils import function_to_schema, load_user_info
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
-class _Agent(BaseModel):
+class OpenAIAgent(BaseModel):
     """
     Base class for all AI agents
     """
@@ -80,3 +86,43 @@ class _Agent(BaseModel):
             if user_message == 'exit':
                 break
             self._run_full_turn(user_message)
+
+class WebAutomationAgent(BaseModel):
+
+    def __init__(self, login_url: str):
+
+        self.login_url = login_url
+        self.credentials = load_user_info()
+        self.driver = webdriver.Chrome()
+        self.wait = WebDriverWait(self.driver, 10)
+
+    def login(self):
+
+        try:
+            # go to login page
+            self.driver.get(self.login_url)
+
+            # get the fields for logging in
+            username_field = self.wait.until(EC.presence_of_element_located((By.XPATH, "//input[contains(@placeholder, 'Email or Swag Name')]")))
+            password_field = self.driver.find_element(By.XPATH, "//input[contains(@placeholder, 'Password')]")
+            
+            # enter credentials
+            username_field.send_keys(self.credentials["USERNAME"])
+            password_field.send_keys(self.credentials["PASSWORD"])
+
+            # login!
+            login_button = self.driver.find_element(By.XPATH, "//button[contains(text(), 'Sign in')]")
+            login_button.click()
+            
+            # Wait for dashboard to load
+            self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "dashboardMiddle")))
+            print("Successfully logged in!")
+
+        except Exception as e:
+            print(f"Could not login because: {e}")
+
+
+
+
+    
+

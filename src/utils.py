@@ -2,7 +2,19 @@
 Helper functions for the project
 """
 import inspect
+import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+
+def load_user_info():
+    return {
+        "username": os.getenv("USERNAME", None),
+        "password": os.getenv("PASSWORD", None)
+    }
 
 def function_to_schema(func) -> dict:
     type_map = {
