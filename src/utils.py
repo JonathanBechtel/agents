@@ -1,5 +1,5 @@
 """
-Helper functions for the project
+Helper functions for the application
 """
 import inspect
 import os
