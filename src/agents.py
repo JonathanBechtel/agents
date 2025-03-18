@@ -1,12 +1,12 @@
 """
 Folder that holds base classes for the different AI agents
 """
-import os
 import json
 import time
 
 from src.utils import function_to_schema, load_user_info
 from src.env_config import API_KEY
+from src.functions import determine_presence_of_modal
 
 from openai import OpenAI
 
@@ -16,7 +16,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 class OpenAIAgent:
@@ -87,6 +86,19 @@ class OpenAIAgent:
                 break
             self._run_full_turn(user_message)
 
+class HTMLAgent:
+
+    def __init__(self):
+
+        self.openai = OpenAI(api_key=API_KEY)
+
+    def _parse_modal(self, page_source):
+
+        system_prompt = f"""
+        This is 
+        """
+
+
 class WebAutomationAgent:
 
     def __init__(self, login_url: str):
@@ -133,18 +145,32 @@ class WebAutomationAgent:
             print(f"Could not login because: {e}")
 
             return False
+        
+    def clear_modal(self):
+
+        page_html = self.driver.page_source
+        modal_info = determine_presence_of_modal(page_html)
+        links_to_survey = 'survey' in modal_info['modal_button_text'].lower().strip()
+
+        if modal_info["has_modal"] and links_to_survey:
+            modal_button = self.driver.find_element(By.XPATH, modal_info["button_selector"])
+            time.sleep(3)
+            modal_button.click()
+        if modal_info["has_modal"] and not links_to_survey:
+            exit_button = self.driver.find_element(By.XPATH, modal_info["exit_selector"])
+            time.sleep(3)
+            exit_button.click()
 
 class SurveyAgent:
 
     def __init__(self, login_url: str):
 
         self.login_url = login_url
+        self.web_agent = WebAutomationAgent(login_url = login_url)
 
     def _login(self):
 
-        web_agent = WebAutomationAgent(login_url = self.login_url)
-
-        self.logged_in_ = web_agent.login()
+        self.logged_in_ = self.web_agent.login()
 
 
     def run(self):
@@ -153,7 +179,11 @@ class SurveyAgent:
 
         time.sleep(60)
 
-        
+        self.web_agent.clear_modal()
+
+
+
+
 
 
 
