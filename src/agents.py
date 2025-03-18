@@ -4,6 +4,9 @@ Folder that holds base classes for the different AI agents
 import os
 import json
 
+from utils import function_to_schema, load_user_info
+from env_config import API_KEY
+
 from openai import OpenAI
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -14,10 +17,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-from utils import function_to_schema, load_user_info
-
-load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
 
 class OpenAIAgent(BaseModel):
     """
@@ -27,7 +26,7 @@ class OpenAIAgent(BaseModel):
                  system_prompt: dict,
                  model: str,
                  functions: list) -> None:
-        self.openai = OpenAI(api_key=api_key)
+        self.openai = OpenAI(api_key=API_KEY)
         self.messages = []
         self.system_prompt = system_prompt
         self.model = model
@@ -118,8 +117,29 @@ class WebAutomationAgent(BaseModel):
             self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "dashboardMiddle")))
             print("Successfully logged in!")
 
+            return True
+
         except Exception as e:
             print(f"Could not login because: {e}")
+
+            return False
+
+class SurveyAgent(BaseModel):
+
+    def __init__(self, login_url: str):
+
+        self.login_url = login_url
+
+    def _login(self):
+
+        web_agent = WebAutomationAgent(login_url = self.login_url)
+
+        self.logged_in_ = web_agent.login()
+
+
+    def run(self):
+
+        self._login()
 
 
 
