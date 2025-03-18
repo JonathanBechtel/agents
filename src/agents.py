@@ -4,21 +4,21 @@ Folder that holds base classes for the different AI agents
 import os
 import json
 
-from utils import function_to_schema, load_user_info
-from env_config import API_KEY
+from src.utils import function_to_schema, load_user_info
+from src.env_config import API_KEY
 
 from openai import OpenAI
-from pydantic import BaseModel
-from dotenv import load_dotenv
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
-class OpenAIAgent(BaseModel):
+class OpenAIAgent:
     """
     Base class for all AI agents
     """
@@ -86,14 +86,16 @@ class OpenAIAgent(BaseModel):
                 break
             self._run_full_turn(user_message)
 
-class WebAutomationAgent(BaseModel):
+class WebAutomationAgent:
 
     def __init__(self, login_url: str):
 
         self.login_url = login_url
         self.credentials = load_user_info()
-        self.driver = webdriver.Chrome()
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service = service)
         self.wait = WebDriverWait(self.driver, 10)
+
 
     def login(self):
 
@@ -106,11 +108,12 @@ class WebAutomationAgent(BaseModel):
             password_field = self.driver.find_element(By.XPATH, "//input[contains(@placeholder, 'Password')]")
             
             # enter credentials
-            username_field.send_keys(self.credentials["USERNAME"])
-            password_field.send_keys(self.credentials["PASSWORD"])
+            username_field.send_keys(self.credentials["username"])
+            password_field.send_keys(self.credentials["password"])
 
             # login!
-            login_button = self.driver.find_element(By.XPATH, "//button[contains(text(), 'Sign in')]")
+            login_button = self.driver.find_element(By.XPATH, 
+                                "//button/span[contains(text(), 'Sign in')]")
             login_button.click()
             
             # Wait for dashboard to load
@@ -124,7 +127,7 @@ class WebAutomationAgent(BaseModel):
 
             return False
 
-class SurveyAgent(BaseModel):
+class SurveyAgent:
 
     def __init__(self, login_url: str):
 

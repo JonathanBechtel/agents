@@ -4,6 +4,8 @@ Helper functions for the project
 import inspect
 import os
 
+from src.env_config import USERNAME, PASSWORD
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,8 +14,8 @@ load_dotenv()
 
 def load_user_info():
     return {
-        "username": os.getenv("USERNAME", None),
-        "password": os.getenv("PASSWORD", None)
+        "username": USERNAME,
+        "password": PASSWORD
     }
 
 def function_to_schema(func) -> dict:
