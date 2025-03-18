@@ -3,6 +3,7 @@ Folder that holds base classes for the different AI agents
 """
 import os
 import json
+import time
 
 from src.utils import function_to_schema, load_user_info
 from src.env_config import API_KEY
@@ -109,15 +110,21 @@ class WebAutomationAgent:
             
             # enter credentials
             username_field.send_keys(self.credentials["username"])
+            time.sleep(4)
             password_field.send_keys(self.credentials["password"])
+            time.sleep(3)
 
             # login!
             login_button = self.driver.find_element(By.XPATH, 
                                 "//button/span[contains(text(), 'Sign in')]")
             login_button.click()
+            time.sleep(10)
             
             # Wait for dashboard to load
-            self.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "dashboardMiddle")))
+            self.wait.until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "body.loggedIn"))
+            )
+
             print("Successfully logged in!")
 
             return True
@@ -143,6 +150,12 @@ class SurveyAgent:
     def run(self):
 
         self._login()
+
+        time.sleep(60)
+
+        
+
+
 
 
 

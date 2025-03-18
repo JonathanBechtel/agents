@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
 def load_user_info():
     return {
         "username": USERNAME,
