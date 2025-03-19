@@ -26,12 +26,12 @@ def determine_presence_of_modal(page_source,
     Return your code ONLY in JSON format.  Give your responses the following
     structure:
 
-    {
+    \\{{
         "has_modal": bool, True if page has modal, False if not,
         "modal_button_text": str, the text that appears on the primary button, None if has_modal is False,
         "exit_selector": str, the XPATH selector to locate the modal exit button, None if has_modal is False,
         "button_selector": str, the XPATH selector to locate the primary button, None if has_modal is False
-    }
+    \\}}
 
     Here is the source code for the page: 
 

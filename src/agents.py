@@ -86,18 +86,6 @@ class OpenAIAgent:
                 break
             self._run_full_turn(user_message)
 
-class HTMLAgent:
-
-    def __init__(self):
-
-        self.openai = OpenAI(api_key=API_KEY)
-
-    def _parse_modal(self, page_source):
-
-        system_prompt = f"""
-        This is 
-        """
-
 
 class WebAutomationAgent:
 
@@ -148,9 +136,10 @@ class WebAutomationAgent:
         
     def clear_modal(self):
 
-        page_html = self.driver.page_source
+        page_html = self.driver.find_element(By.TAG_NAME, "body").text
         modal_info = determine_presence_of_modal(page_html)
-        links_to_survey = 'survey' in modal_info['modal_button_text'].lower().strip()
+        print(modal_info)
+        links_to_survey = 'survey' in modal_info['modal_button_text'].lower().strip() if modal_info["has_modal"] else False
 
         if modal_info["has_modal"] and links_to_survey:
             modal_button = self.driver.find_element(By.XPATH, modal_info["button_selector"])
